@@ -11,14 +11,15 @@ void find_c_files_and_execute_symlink(const char root_realtive_path[], const uns
 
 static int is_c_file(const char name[]);
 static int check_for_dot_refs(char name[]);
-static void options_execution(const char c_file_path[], const char options[]);
+static void options_execution(const char c_file_path[], const char options[], const char c_file_name[]);
 static void check_for_invalid_options(const char options[]);
-static void check_if_symlink_exists(const char c_file_name[]);
+static void check_if_symlink_exists_already_and_unlink(const char c_file_name[]);
 static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] , const char c_file_name[]);
+static void create_first_child_process(char *new_relative_path, const char *options, const char * c_file_name);
+static void create_second_child_process(const char *c_file_path, const char c_file_name[]);
 
 
-
-const char possible_options[NO_OF_POSSIBLE_OPTIONS]="nuadc";
+const char possible_options[NO_OF_POSSIBLE_OPTIONS]="nuadcgp";
 
 static int is_c_file(const char name[])
 {
@@ -31,6 +32,80 @@ static int check_for_dot_refs(char name[])
     if(strcmp(".", name)==0 || strcmp("..", name)==0)
         return 1;
     return 0;
+}
+
+static void create_first_child_process(char *new_relative_path, const char *options, const char c_file_name[]) {
+    int child_PID;
+    int child_status;
+    
+    if( (child_PID=fork()) <0 )
+        ERROR_perror();
+    if(child_PID == 0) /** child code here*/
+    {
+        options_execution(new_relative_path, options, c_file_name);
+        
+        exit(0); /** in order to put child on zombie state, with exit code 0*/
+    }
+    for(;;){
+        int w = waitpid(child_PID, &child_status, WNOHANG); //No hang means it doesn't wait for it
+        if( w == child_PID) //means change of state;  w == 0 means there is no change in child's state
+        {
+            if( WIFEXITED(child_status))
+            {
+                printf("Child process with PID (%d) exited with code (%d)\n", child_PID, WEXITSTATUS(child_status));
+                break;
+            }
+            else if (WIFSIGNALED(child_status))
+            {
+                printf("Child process with PID (%d) terminated due to signal no. (%d)\n", child_PID, WTERMSIG(child_status));
+                break;
+            }
+        }
+        else if (w==-1)
+        {
+            ERROR_custom("There is no child process with PID (%d)\n", child_PID);
+        }
+    }
+}
+
+static void create_second_child_process(const char *c_file_path, const char c_file_name[]) {
+    int child_PID;
+    int child_status;
+    
+    char out_file_name[100];
+    
+    strcpy(out_file_name, "./");
+    strncat(out_file_name, c_file_name, strlen(c_file_name)-2);
+    strcat(out_file_name, "_out");
+    
+    if( (child_PID=fork()) <0 )
+        ERROR_perror();
+    if(child_PID == 0) /** child code here*/
+    {
+        execlp("gcc", "gcc", "-Wall", "-o", out_file_name, c_file_path, NULL);
+        
+        ERROR_custom("Could not overwrite fork() function with execlp(...) call\n");
+    }
+    for(;;){
+        int w = waitpid(child_PID, &child_status, WNOHANG); //No hang means it doesn't wait for it
+        if( w == child_PID) //means change of state;  w == 0 means there is no change in child's state
+        {
+            if( WIFEXITED(child_status))
+            {
+                printf("Child process with PID (%d) exited with code (%d)\n", child_PID, WEXITSTATUS(child_status));
+                break;
+            }
+            else if (WIFSIGNALED(child_status))
+            {
+                printf("Child process with PID (%d) terminated due to signal no. (%d)\n", child_PID, WTERMSIG(child_status));
+                break;
+            }
+        }
+        else if (w==-1)
+        {
+            ERROR_custom("There is no child process with PID (%d)\n", child_PID);
+        }
+    }
 }
 
 void find_c_files_and_execute_symlink(const char root_realtive_path[], const unsigned int step, const char options[]) {
@@ -46,7 +121,7 @@ void find_c_files_and_execute_symlink(const char root_realtive_path[], const uns
             
             if( is_c_file(new_relative_path) && !check_for_dot_refs(dir_entry->d_name))
             {
-                options_execution(new_relative_path, options);
+                create_first_child_process(new_relative_path, options, dir_entry->d_name);
                 create_symlink_for_c_files_under_100kb(new_relative_path, dir_entry->d_name);
             }
             else if( is_Directory() && !check_for_dot_refs(dir_entry->d_name))
@@ -61,7 +136,7 @@ void find_c_files_and_execute_symlink(const char root_realtive_path[], const uns
 
 }
 
-static void options_execution(const char c_file_path[], const char options[])
+static void options_execution(const char c_file_path[], const char options[], const char c_file_name[])
 {
     if(options != NULL)
     {
@@ -149,6 +224,11 @@ static void options_execution(const char c_file_path[], const char options[])
         {
             printf("\nNumber of Hard Links = %d\n", get_file_no_of_Hard_Links());
         }
+        
+        if(strchr(options, 'g'))
+        {
+            create_second_child_process(c_file_path, c_file_name);
+        }
     }
     //options can be missed
 }
@@ -169,7 +249,7 @@ static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] ,
     float size_in_kilobytes= get_file_Byte_size() / 1024; //conversion from bytes to kilobytes
     
     char path_without_c_extension[100]="./";
-    check_if_symlink_exists(c_file_name);
+    check_if_symlink_exists_already_and_unlink(c_file_name);
 
     strncat(path_without_c_extension, c_file_name, strlen(c_file_name)-2);
     
@@ -180,7 +260,7 @@ static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] ,
     }
 }
 
-static void check_if_symlink_exists(const char c_file_name[])
+static void check_if_symlink_exists_already_and_unlink(const char c_file_name[])
 {
     char name_without_c[100]="";
     char path_to_be_unlinked[100]="./";

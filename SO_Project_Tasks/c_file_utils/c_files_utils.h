@@ -28,7 +28,7 @@
 #include "../general_utils/general_utils.h"
 
 /** no of possible options + 1 ( \0 character ) **/
-#define NO_OF_POSSIBLE_OPTIONS 6
+#define NO_OF_POSSIBLE_OPTIONS 8
 
 void find_c_files_and_execute_symlink(const char *, const unsigned int, const char *);
 
