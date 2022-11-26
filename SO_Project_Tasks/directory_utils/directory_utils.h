@@ -24,28 +24,21 @@
 
 #include <unistd.h> /** for symlink() function*/
 
-#define ERROR_perror()                                              \
-            do                                                      \
-            {                                                       \
-                char message[100];                                  \
-                sprintf(message, "Error at line %d : ", __LINE__);  \
-                perror(message);                                    \
-                exit(EXIT_FAILURE);                                 \
-            }while(0)
+#include "../c_file_utils/c_files_utils.h"
+#include "../general_utils/general_utils.h"
+
+typedef struct DIR_stack{
+    DIR *stack[100];
+    char name[100][100];
+    unsigned int dir_pointer;
+    unsigned int char_pointer;
+}DIR_stack;
+extern DIR_stack dir;
 
 
-#define ERROR_custom(...)                                           \
-            do                                                      \
-            {                                                       \
-                char message[100];                                  \
-                sprintf(message, "Error at line %d : ", __LINE__);  \
-                fprintf(stderr, "%s", message);                     \
-                fprintf(stderr,__VA_ARGS__);                        \
-                exit(EXIT_FAILURE);                                 \
-            }while(0)
-
-
-void search_c_files(const char *, const char*, const int, const char*);
+void search_c_files(const char *, const char*, const int, const char* );
 void print_directories_names(void);
+void open_directory(const char* );
+void close_directories(void);
 
 #endif /* directory_utils_h */
