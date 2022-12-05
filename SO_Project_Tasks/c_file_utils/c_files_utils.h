@@ -24,9 +24,11 @@
 
 #include <unistd.h> /** for symlink() function*/
 
+#include <sys/types.h>
+
 #include "../directory_utils/directory_utils.h"
 #include "../general_utils/general_utils.h"
-
+#include "../process_management/process_management.h"
 /** no of possible options + 1 ( \0 character ) **/
 #define NO_OF_POSSIBLE_OPTIONS 8
 

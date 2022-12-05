@@ -36,7 +36,7 @@ typedef struct DIR_stack{
 extern DIR_stack dir;
 
 
-void search_c_files(const char *, const char*, const int, const char* );
+void search_c_files(const char *, const char*, const int);
 void print_directories_names(void);
 void open_directory(const char* );
 void close_directories(void);

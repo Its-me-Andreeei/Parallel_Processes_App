@@ -11,17 +11,17 @@
 
 DIR_stack dir;
 
-static void check_no_of_args(const int argc, const char* argv4);
+static void check_no_of_args(const int argc);
 static void directory_checking(const char *directory_path);
 void open_directory(const char* directory_path);
 void close_directories(void);
-void search_c_files(const char input_name[], const char options[], const int argc, const char argv4[] );
+void search_c_files(const char input_name[], const char options[], const int argc);
 void print_directories_names(void); /** for debugging purpose */
 
 
-static void check_no_of_args(const int argc, const char* argv4)
+static void check_no_of_args(const int argc)
 {
-    if(!((argc>=2 && argc <=3) || (strcmp(argv4, "DEBUG")==0 && argc==4)))
+    if( !(argc>=2 && argc <=3) )
         ERROR_custom("Number of Arguments do not match\n");
 }
 
@@ -51,14 +51,14 @@ void close_directories(void)
     dir.dir_pointer=0; //dir_pointer must be reseted
 }
 
-void search_c_files(const char input_name[], const char options[], const int argc, const char argv4[] )
+void search_c_files(const char input_name[], const char options[], const int argc)
 {
     assert(input_name != NULL);
     
     if(input_name == NULL)
         ERROR_custom("There is no directory.\n");
     
-    check_no_of_args(argc, argv4);
+    check_no_of_args(argc);
     
     //create base relative path
     char relative_path[100]="./";

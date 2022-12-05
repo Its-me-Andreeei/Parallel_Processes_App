@@ -14,9 +14,9 @@
 
 int main(const int argc, const char * argv[]) {
 
-    search_c_files(argv[1], argv[2], argc, argv[4]);
+    search_c_files(argv[1], argv[2], argc);
     
-    print_directories_names();//For debugging
+    print_directories_names();//For debugging only
         
     return 0;
 }

@@ -15,8 +15,6 @@ static void options_execution(const char c_file_path[], const char options[], co
 static void check_for_invalid_options(const char options[]);
 static void check_if_symlink_exists_already_and_unlink(const char c_file_name[]);
 static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] , const char c_file_name[]);
-static void create_first_child_process(char *new_relative_path, const char *options, const char * c_file_name);
-static void create_second_child_process(const char *c_file_path, const char c_file_name[]);
 
 
 const char possible_options[NO_OF_POSSIBLE_OPTIONS]="nuadcgp";
@@ -34,79 +32,7 @@ static int check_for_dot_refs(char name[])
     return 0;
 }
 
-static void create_first_child_process(char *new_relative_path, const char *options, const char c_file_name[]) {
-    int child_PID;
-    int child_status;
-    
-    if( (child_PID=fork()) <0 )
-        ERROR_perror();
-    if(child_PID == 0) /** child code here*/
-    {
-        options_execution(new_relative_path, options, c_file_name);
-        
-        exit(0); /** in order to put child on zombie state, with exit code 0*/
-    }
-    for(;;){
-        int w = waitpid(child_PID, &child_status, WNOHANG); //No hang means it doesn't wait for it
-        if( w == child_PID) //means change of state;  w == 0 means there is no change in child's state
-        {
-            if( WIFEXITED(child_status))
-            {
-                printf("Child process with PID (%d) exited with code (%d)\n", child_PID, WEXITSTATUS(child_status));
-                break;
-            }
-            else if (WIFSIGNALED(child_status))
-            {
-                printf("Child process with PID (%d) terminated due to signal no. (%d)\n", child_PID, WTERMSIG(child_status));
-                break;
-            }
-        }
-        else if (w==-1)
-        {
-            ERROR_custom("There is no child process with PID (%d)\n", child_PID);
-        }
-    }
-}
 
-static void create_second_child_process(const char *c_file_path, const char c_file_name[]) {
-    int child_PID;
-    int child_status;
-    
-    char out_file_name[100];
-    
-    strcpy(out_file_name, "./");
-    strncat(out_file_name, c_file_name, strlen(c_file_name)-2);
-    strcat(out_file_name, "_out");
-    
-    if( (child_PID=fork()) <0 )
-        ERROR_perror();
-    if(child_PID == 0) /** child code here*/
-    {
-        execlp("gcc", "gcc", "-Wall", "-o", out_file_name, c_file_path, NULL);
-        
-        ERROR_custom("Could not overwrite fork() function with execlp(...) call\n");
-    }
-    for(;;){
-        int w = waitpid(child_PID, &child_status, WNOHANG); //No hang means it doesn't wait for it
-        if( w == child_PID) //means change of state;  w == 0 means there is no change in child's state
-        {
-            if( WIFEXITED(child_status))
-            {
-                printf("Child process with PID (%d) exited with code (%d)\n", child_PID, WEXITSTATUS(child_status));
-                break;
-            }
-            else if (WIFSIGNALED(child_status))
-            {
-                printf("Child process with PID (%d) terminated due to signal no. (%d)\n", child_PID, WTERMSIG(child_status));
-                break;
-            }
-        }
-        else if (w==-1)
-        {
-            ERROR_custom("There is no child process with PID (%d)\n", child_PID);
-        }
-    }
-}
 
 void find_c_files_and_execute_symlink(const char root_realtive_path[], const unsigned int step, const char options[]) {
     struct dirent *dir_entry;
@@ -121,7 +47,7 @@ void find_c_files_and_execute_symlink(const char root_realtive_path[], const uns
             
             if( is_c_file(new_relative_path) && !check_for_dot_refs(dir_entry->d_name))
             {
-                create_first_child_process(new_relative_path, options, dir_entry->d_name);
+                execute_options_process(new_relative_path, options, dir_entry->d_name, &options_execution);
                 create_symlink_for_c_files_under_100kb(new_relative_path, dir_entry->d_name);
             }
             else if( is_Directory() && !check_for_dot_refs(dir_entry->d_name))
@@ -225,9 +151,13 @@ static void options_execution(const char c_file_path[], const char options[], co
             printf("\nNumber of Hard Links = %d\n", get_file_no_of_Hard_Links());
         }
         
-        if(strchr(options, 'g'))
+        if(strchr(options, 'g') && !strchr(options, 'p'))
         {
-            create_second_child_process(c_file_path, c_file_name);
+            compile_c_file_process_simple_variant(c_file_path, c_file_name, options);
+        }
+        if(strchr(options, 'g') && strchr(options, 'p'))
+        {
+            compile_c_file_process_modified_variant(c_file_path, c_file_name, options);
         }
     }
     //options can be missed
