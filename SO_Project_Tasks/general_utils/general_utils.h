@@ -23,27 +23,30 @@
 
 
 
-#define ERROR_perror()                                              \
-            do                                                      \
-            {                                                       \
-                char message[100];                                  \
-                sprintf(message, "Error at line %d : ", __LINE__);  \
-                perror(message);                                    \
-                exit(EXIT_FAILURE);                                 \
+#define ERROR_perror()                                                                        \
+            do                                                                                \
+            {                                                                                 \
+                char message[100];                                                            \
+                sprintf(message, "Error in file %s at line %d : ", __FILE_NAME__, __LINE__);  \
+                perror(message);                                                              \
+                exit(EXIT_FAILURE);                                                           \
             }while(0)
 
 
-#define ERROR_custom(...)                                           \
-            do                                                      \
-            {                                                       \
-                char message[100];                                  \
-                sprintf(message, "Error at line %d : ", __LINE__);  \
-                fprintf(stderr, "%s", message);                     \
-                fprintf(stderr,__VA_ARGS__);                        \
-                exit(EXIT_FAILURE);                                 \
+#define ERROR_custom(...)                                                                      \
+            do                                                                                 \
+            {                                                                                  \
+                char message[100];                                                             \
+                sprintf(message, "Error in file %s at line %d : ", __FILE_NAME__, __LINE__);   \
+                fprintf(stderr, "%s", message);                                                \
+                fprintf(stderr,__VA_ARGS__);                                                   \
+                exit(EXIT_FAILURE);                                                            \
             }while(0)
 
 void lstat_checking(const char *); //to be integrated as a static function
+
+int does_Regular_File_Exists(const char *relative_path);
+int does_Symbolic_Link_Exists(const char *relative_path);
 
 int is_Directory(void);
 
@@ -52,6 +55,7 @@ long long get_file_Byte_size(void);
 int get_file_no_of_Hard_Links(void);
 
 int is_Regular_File(void);
+int is_Symbolic_Link(void);
 
 int is_User_Read_Allowed(void);
 int is_User_Write_Allowed(void);

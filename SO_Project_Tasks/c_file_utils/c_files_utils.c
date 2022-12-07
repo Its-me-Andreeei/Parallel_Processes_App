@@ -7,8 +7,8 @@
 
 #include "c_files_utils.h"
 
-void find_c_files_and_execute_symlink(const char root_realtive_path[], const unsigned int step, const char options[]);
 
+void find_c_files_and_execute_symlink(const char root_realtive_path[], const unsigned int step, const char options[]);
 static int is_c_file(const char name[]);
 static int check_for_dot_refs(char name[]);
 static void options_execution(const char c_file_path[], const char options[], const char c_file_name[]);
@@ -177,11 +177,9 @@ static void check_for_invalid_options(const char options[])
 static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] , const char c_file_name[])
 {
     float size_in_kilobytes= get_file_Byte_size() / 1024; //conversion from bytes to kilobytes
+    char path_without_c_extension[100];
     
-    char path_without_c_extension[100]="./";
-    check_if_symlink_exists_already_and_unlink(c_file_name);
-
-    strncat(path_without_c_extension, c_file_name, strlen(c_file_name)-2);
+    create_unique_name_for_symbolic_link(c_file_name, path_without_c_extension);
     
     if(size_in_kilobytes < 100)
     {
@@ -194,10 +192,10 @@ static void check_if_symlink_exists_already_and_unlink(const char c_file_name[])
 {
     char name_without_c[100]="";
     char path_to_be_unlinked[100]="./";
-    
+
     strncpy(name_without_c, c_file_name, strlen(c_file_name) - 2);
     strcat(path_to_be_unlinked, name_without_c);
-    
+
     if( unlink(path_to_be_unlinked)!=0)
     {
         char str[100];

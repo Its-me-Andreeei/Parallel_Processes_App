@@ -9,22 +9,47 @@
 
 void execute_options_process(char *new_relative_path, const char *options, const char c_file_name[], void (*options_execution_def)(const char *, const char *, const char *) );
 void compile_c_file_process_simple_variant(const char *c_file_path, const char c_file_name[], const char options[] );
-void compile_c_files_process_modified_variant(const char *c_file_path, const char c_file_name[], const char options[] );
 void wait_for_child_loop(pid_t child_PID, char*);
+void create_unique_name_for_symbolic_link(const char *c_file_name, char *path_without_c_extension);
+
 static void launch_grep_as_process_without_waitPID_inside(pid_t *c2_child_PID, int pipe_c1_c2[2], int pipe_p_c2[2]);
 static void launch_gcc_as_process_without_waitPID_inside(pid_t *c1_child_PID, const char *c_file_name, const char *c_file_path, char *out_file_name, int pipe_c1_c2[2], int pipe_p_c2[2]);
 static void read_buffer_from_pipe(char *buffer, int *pipe_p_c2);
 static float calculate_result(char buffer[]);
 static int get_number_of_warnings(char buffer[]);
+static void create_unique_name_for_out_file(const char *c_file_name, char *out_file_name);
+
+
+
+static void create_unique_name_for_out_file(const char *c_file_name, char *out_file_name)
+{
+    strcpy(out_file_name, "./"); //overrides out_file_name if there is any content
+    strncat(out_file_name, c_file_name, strlen(c_file_name)-2); //name without ".c"
+    strcat(out_file_name, "_out");
+
+    while(does_Regular_File_Exists(out_file_name))
+    {
+        strcat(out_file_name, "1");
+    }
+}
+
+void create_unique_name_for_symbolic_link(const char *c_file_name, char *path_without_c_extension)
+{
+    strcpy( path_without_c_extension, "./");
+    strncat(path_without_c_extension, c_file_name, strlen(c_file_name)-2);
+    
+    while(does_Symbolic_Link_Exists(path_without_c_extension))
+    {
+        strcat(path_without_c_extension, "_1");
+    }
+}
 
 void compile_c_file_process_simple_variant(const char *c_file_path, const char c_file_name[], const char options[] )
 {
     pid_t second_child_PID;
     char out_file_name[100];
-    
-    strcpy(out_file_name, "./");
-    strncat(out_file_name, c_file_name, strlen(c_file_name)-2);
-    strcat(out_file_name, "_out");
+
+    create_unique_name_for_out_file(c_file_name, out_file_name);
     
     /**create child process for compile**/
     if( (second_child_PID=fork()) <0 )
@@ -51,9 +76,7 @@ static void launch_gcc_as_process_without_waitPID_inside(pid_t *c1_child_PID, co
         if(dup2(pipe_c1_c2[1], 2) < 0)
             ERROR_perror();
         
-        strcpy(out_file_name, "./");
-        strncat(out_file_name, c_file_name, strlen(c_file_name)-2);
-        strcat(out_file_name, "_out");
+        create_unique_name_for_out_file(c_file_name, out_file_name);
         
         printf("warning");
         execlp("gcc", "gcc", "-Wall", "-o", out_file_name, c_file_path, NULL); //execlp also closes pipe ends

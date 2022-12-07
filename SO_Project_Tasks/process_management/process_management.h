@@ -34,5 +34,6 @@ void execute_options_process(char *new_relative_path, const char *options, const
 void compile_c_file_process_simple_variant(const char *c_file_path, const char c_file_name[], const char options[]);
 void compile_c_file_process_modified_variant(const char *c_file_path, const char c_file_name[], const char options[] );
 void wait_for_child_loop(pid_t child_PID, char*);
+void create_unique_name_for_symbolic_link(const char *c_file_name, char *path_without_c_extension);
 
 #endif /* process_management_h */

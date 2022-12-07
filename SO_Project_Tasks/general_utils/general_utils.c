@@ -10,11 +10,36 @@
 struct stat lstat_result;
 
 
+//mode -> when is 1 : the "No such file or directory error" is ignored
 void lstat_checking(const char *relative_path) {
     assert(relative_path != NULL);
     
     if(lstat(relative_path, &lstat_result)!=0)
         ERROR_perror();
+}
+
+int does_Regular_File_Exists(const char *relative_path)
+{
+    if(lstat(relative_path, &lstat_result)!=0)
+    {
+        if(errno == ENOENT)
+            return 0;
+        else
+            ERROR_perror();
+    }
+    return is_Regular_File();
+}
+
+int does_Symbolic_Link_Exists(const char *relative_path)
+{
+    if(lstat(relative_path, &lstat_result)!=0)
+    {
+        if(errno == ENOENT)
+            return 0;
+        else
+            ERROR_perror();
+    }
+    return is_Symbolic_Link();
 }
 
 int is_Directory()
@@ -85,4 +110,9 @@ int is_Other_Execute_Allowed()
 int is_Regular_File()
 {
     return S_ISREG(lstat_result.st_mode);
+}
+int is_Symbolic_Link()
+{
+    return S_ISLNK(lstat_result.st_mode);
+    
 }
