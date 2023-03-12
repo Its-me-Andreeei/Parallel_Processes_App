@@ -193,19 +193,19 @@ static void create_symlink_for_c_files_under_100kb(const char path_of_c_file[] ,
     }
 }
 
-static void check_if_symlink_exists_already_and_unlink(const char c_file_name[])
-{
-    char name_without_c[100]="";
-    char path_to_be_unlinked[100]="./";
-
-    strncpy(name_without_c, c_file_name, strlen(c_file_name) - 2);
-    strcat(path_to_be_unlinked, name_without_c);
-
-    if( unlink(path_to_be_unlinked)!=0)
-    {
-        char str[100];
-        strcpy(str, strerror(errno));
-        if(strcmp("No such file or directory", str)!=0)
-            ERROR_perror();
-    }
-}
+//static void check_if_symlink_exists_already_and_unlink(const char c_file_name[])
+//{
+//    char name_without_c[100]="";
+//    char path_to_be_unlinked[100]="./";
+//
+//    strncpy(name_without_c, c_file_name, strlen(c_file_name) - 2);
+//    strcat(path_to_be_unlinked, name_without_c);
+//
+//    if( unlink(path_to_be_unlinked)!=0)
+//    {
+//        char str[100];
+//        strcpy(str, strerror(errno));
+//        if(strcmp("No such file or directory", str)!=0)
+//            ERROR_perror();
+//    }
+//}
