@@ -28,7 +28,6 @@
 
 /* Begin PBXFileReference section */
 		87261BDB292F711200F5B37E /* SO_Project_Tasks */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SO_Project_Tasks; sourceTree = BUILT_PRODUCTS_DIR; };
-		876C5B932937D94A006AE6F6 /* SO_Project_Tasks.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = SO_Project_Tasks.profdata; sourceTree = "<group>"; };
 		876C5B952937DEDE006AE6F6 /* process_management.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = process_management.h; sourceTree = "<group>"; };
 		876C5B962937DEDE006AE6F6 /* process_management.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = process_management.c; sourceTree = "<group>"; };
 		87BC4115293232D30068CC3E /* directory_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = directory_utils.c; sourceTree = "<group>"; };
@@ -56,7 +55,6 @@
 			children = (
 				87261BDD292F711200F5B37E /* SO_Project_Tasks */,
 				87261BDC292F711200F5B37E /* Products */,
-				876C5B922937D94A006AE6F6 /* OptimizationProfiles */,
 			);
 			sourceTree = "<group>";
 		};
@@ -78,14 +76,6 @@
 				87BC4118293232F20068CC3E /* main.c */,
 			);
 			path = SO_Project_Tasks;
-			sourceTree = "<group>";
-		};
-		876C5B922937D94A006AE6F6 /* OptimizationProfiles */ = {
-			isa = PBXGroup;
-			children = (
-				876C5B932937D94A006AE6F6 /* SO_Project_Tasks.profdata */,
-			);
-			path = OptimizationProfiles;
 			sourceTree = "<group>";
 		};
 		876C5B942937DEB9006AE6F6 /* process_management */ = {

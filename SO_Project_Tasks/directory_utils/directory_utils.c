@@ -69,6 +69,8 @@ void search_c_files(const char input_name[], const char options[], const int arg
     dir.char_pointer=1;
     
     find_c_files_and_execute_symlink(relative_path, 0, options);
+    
+    
     close_directories();
 }
 

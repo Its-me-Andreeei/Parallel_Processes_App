@@ -30,7 +30,8 @@
 
 #include "../general_utils/general_utils.h"
 
-void execute_options_process(char *new_relative_path, const char *options, const char c_file_name[], void (*option_execution_def)(const char *, const char *, const char *) );
+void execute_options_process_without_wait(pid_t *child_PID, char *new_relative_path, const char *options, const char c_file_name[], void (*option_execution_def)(const char *, const char *, const char *) );
+void create_symbolic_link_process_without_wait(pid_t *child_PID, const char *new_relative_path, char *c_file_name, void (*create_symlink_def)(const char *, const char *) );
 void compile_c_file_process_simple_variant(const char *c_file_path, const char c_file_name[], const char options[]);
 void compile_c_file_process_modified_variant(const char *c_file_path, const char c_file_name[], const char options[] );
 void wait_for_child_loop(pid_t child_PID, char*);

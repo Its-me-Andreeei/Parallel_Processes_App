@@ -33,5 +33,4 @@
 #define NO_OF_POSSIBLE_OPTIONS 8
 
 void find_c_files_and_execute_symlink(const char *, const unsigned int, const char *);
-
 #endif /* c_files_utils_h */

@@ -47,8 +47,13 @@ void find_c_files_and_execute_symlink(const char root_realtive_path[], const uns
             
             if( is_c_file(new_relative_path) && !check_for_dot_refs(dir_entry->d_name))
             {
-                execute_options_process(new_relative_path, options, dir_entry->d_name, &options_execution);
-                create_symlink_for_c_files_under_100kb(new_relative_path, dir_entry->d_name);
+                pid_t execute_options_PID, symbolic_link_PID;
+                
+                execute_options_process_without_wait(&execute_options_PID, new_relative_path, options, dir_entry->d_name, &options_execution);
+                create_symbolic_link_process_without_wait(&symbolic_link_PID, new_relative_path, dir_entry->d_name, &create_symlink_for_c_files_under_100kb);
+
+                wait_for_child_loop(execute_options_PID, NULL);
+                wait_for_child_loop(symbolic_link_PID, NULL);
             }
             else if( is_Directory() && !check_for_dot_refs(dir_entry->d_name))
             {

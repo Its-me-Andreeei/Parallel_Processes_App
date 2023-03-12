@@ -10,7 +10,6 @@
 struct stat lstat_result;
 
 
-//mode -> when is 1 : the "No such file or directory error" is ignored
 void lstat_checking(const char *relative_path) {
     assert(relative_path != NULL);
     

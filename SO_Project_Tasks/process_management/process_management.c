@@ -7,10 +7,11 @@
 
 #include "process_management.h"
 
-void execute_options_process(char *new_relative_path, const char *options, const char c_file_name[], void (*options_execution_def)(const char *, const char *, const char *) );
+void execute_options_process_without_wait(pid_t *child_PID, char *new_relative_path, const char *options, const char c_file_name[], void (*options_execution_def)(const char *, const char *, const char *) );
 void compile_c_file_process_simple_variant(const char *c_file_path, const char c_file_name[], const char options[] );
 void wait_for_child_loop(pid_t child_PID, char*);
 void create_unique_name_for_symbolic_link(const char *c_file_name, char *path_without_c_extension);
+void create_symbolic_link_process_without_wait(pid_t *child_PID, const char *new_relative_path, char *c_file_name, void (*create_symlink_def)(const char *, const char *) );
 
 static void launch_grep_as_process_without_waitPID_inside(pid_t *c2_child_PID, int pipe_c1_c2[2], int pipe_p_c2[2]);
 static void launch_gcc_as_process_without_waitPID_inside(pid_t *c1_child_PID, const char *c_file_name, const char *c_file_path, char *out_file_name, int pipe_c1_c2[2], int pipe_p_c2[2]);
@@ -78,7 +79,7 @@ static void launch_gcc_as_process_without_waitPID_inside(pid_t *c1_child_PID, co
         
         create_unique_name_for_out_file(c_file_name, out_file_name);
         
-        printf("warning");
+        //printf("\nwarning\n");
         execlp("gcc", "gcc", "-Wall", "-o", out_file_name, c_file_path, NULL); //execlp also closes pipe ends
         ERROR_custom("Could not overwrite fork() function with execlp(...) call\n");
     }
@@ -202,7 +203,7 @@ void wait_for_child_loop(pid_t child_PID, char *justification)
         {
             if( WIFEXITED(child_status))
             {
-                if(justification==NULL)
+                if(justification==NULL || WEXITSTATUS(child_status) == 0)
                     printf("Child process with PID (%d) exited with code (%d)\n", child_PID, WEXITSTATUS(child_status));
                 else if(justification!=NULL && WEXITSTATUS(child_status)!=0)
                     printf("Child process with PID (%d) exited with code (%d) : %s\n", child_PID, WEXITSTATUS(child_status), justification);
@@ -224,17 +225,27 @@ void wait_for_child_loop(pid_t child_PID, char *justification)
     }
 }
 
-void execute_options_process(char *new_relative_path, const char *options, const char c_file_name[], void (*options_execution_def)(const char *, const char *, const char *) )
+void execute_options_process_without_wait(pid_t *child_PID, char *new_relative_path, const char *options, const char c_file_name[], void (*options_execution_def)(const char *, const char *, const char *) )
 {
-    pid_t child_PID;
-    
-    if( (child_PID=fork()) <0 )
+    if( (*child_PID=fork()) <0 )
         ERROR_perror();
-    if(child_PID == 0) /** child code here*/
+    if(*child_PID == 0) /** child code here*/
     {
         options_execution_def(new_relative_path, options, c_file_name);
         
-        exit(0); /** in order to put child on zombie state, with exit code 0*/
+        exit(0);
     }
-    wait_for_child_loop(child_PID, NULL);
+}
+
+void create_symbolic_link_process_without_wait(pid_t *child_PID, const char *new_relative_path, char *c_file_name, void (*create_symlink_def)(const char *, const char *) )
+{
+    
+    if( (*child_PID=fork()) <0 )
+        ERROR_perror();
+    if(*child_PID == 0) /** child code here*/
+    {
+        create_symlink_def(new_relative_path, c_file_name);
+        
+        exit(0);
+    }
 }
